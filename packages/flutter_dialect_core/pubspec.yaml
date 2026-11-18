@@ -2,7 +2,9 @@ name: flutter_dialect_core
 description: >-
   Detects a Flutter project's conventions (state management, layout, HTTP
   client, model style) and generates OpenAPI code that follows them.
-version: 0.1.0
+version: 0.1.1
+repository: https://github.com/buivanday96/flutter_dialect/tree/main/packages/flutter_dialect_core
+issue_tracker: https://github.com/buivanday96/flutter_dialect/issues
 resolution: workspace
 environment:
   sdk: ^3.9.0

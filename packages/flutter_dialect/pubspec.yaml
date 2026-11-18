@@ -2,7 +2,9 @@ name: flutter_dialect
 description: >-
   Gives AI coding agents your Flutter project's conventions over MCP, and
   generates OpenAPI models and repositories in your project's own style.
-version: 0.1.0
+version: 0.1.1
+repository: https://github.com/buivanday96/flutter_dialect/tree/main/packages/flutter_dialect
+issue_tracker: https://github.com/buivanday96/flutter_dialect/issues
 resolution: workspace
 environment:
   sdk: ^3.9.0

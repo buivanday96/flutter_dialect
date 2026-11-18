@@ -6,7 +6,7 @@ import 'package:dart_mcp/server.dart';
 import 'package:flutter_dialect_core/flutter_dialect_core.dart';
 import 'package:path/path.dart' as p;
 
-const version = '0.1.0';
+const version = '0.1.1';
 
 const _instructions = '''
 Flutter Dialect knows this Flutter project's conventions (state management, folder

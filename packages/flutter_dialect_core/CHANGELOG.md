@@ -1,3 +1,7 @@
+## 0.1.1
+
+- Add repository and issue tracker links. No code changes.
+
 ## 0.1.0
 
 - First release as `flutter_dialect_core` (the same code was published once as
