@@ -1,7 +1,7 @@
-# FlutterForge
+# Flutter Dialect
 
 AI coding agents write Flutter code that ignores how your project is built: the wrong state
-management, extra layers, the wrong folder layout, a second HTTP client. FlutterForge reads your
+management, extra layers, the wrong folder layout, a second HTTP client. Flutter Dialect reads your
 project, works out its conventions, and hands them to the agent over MCP. It also turns an OpenAPI
 spec into models and repositories written the way your project already writes them.
 
@@ -11,9 +11,9 @@ apply a previewed plan.
 ## 60-second tour
 
 ```bash
-dart pub global activate flutterforge    # installs `flutterforge` and `flutterforge_mcp`
+dart pub global activate flutter_dialect    # installs `flutter_dialect` and `flutter_dialect_mcp`
 cd path/to/your_app
-flutterforge rules
+flutter_dialect rules
 ```
 
 ```markdown
@@ -40,26 +40,26 @@ rules and real example files before writing code.
 
 ## MCP server
 
-After `dart pub global activate flutterforge`, `flutterforge_mcp` is on your PATH
+After `dart pub global activate flutter_dialect`, `flutter_dialect_mcp` is on your PATH
 (`~/.pub-cache/bin`).
 
 **Claude Code** (run inside your Flutter project):
 
 ```bash
-claude mcp add flutterforge -- flutterforge_mcp
+claude mcp add flutter_dialect -- flutter_dialect_mcp
 ```
 
 **Cursor**: add to `.cursor/mcp.json`:
 
 ```json
-{ "mcpServers": { "flutterforge": { "command": "flutterforge_mcp" } } }
+{ "mcpServers": { "flutter_dialect": { "command": "flutter_dialect_mcp" } } }
 ```
 
 For the fastest startup, compile a native binary from a checkout of this repository and point the
 config at it:
 
 ```bash
-dart compile exe packages/flutterforge/bin/flutterforge_mcp.dart -o ~/.local/bin/flutterforge_mcp
+dart compile exe packages/flutter_dialect/bin/flutter_dialect_mcp.dart -o ~/.local/bin/flutter_dialect_mcp
 ```
 
 The server uses its working directory as the project; pass `--root <dir>` to override.
@@ -67,7 +67,7 @@ The server uses its working directory as the project; pass `--root <dir>` to ove
 | Tool | Writes? | What it does |
 |---|---|---|
 | `get_project_context` | no | Conventions as JSON, each with value, confidence and evidence files |
-| `get_agent_rules` | no | Markdown rules to follow (also resource `flutterforge://rules`) |
+| `get_agent_rules` | no | Markdown rules to follow (also resource `dialect://rules`) |
 | `find_similar_code` | no | 1–2 real files of a kind (`repository`, `screen`, `state`, `model`, `widget`, `service`, `test`) to copy |
 | `plan_api_generation` | no | OpenAPI spec + tag → plan id, file summary, warnings, unified diff |
 | `apply_plan` | yes | Writes a plan: refuses a dirty git tree, never overwrites, skips files changed since the plan |
@@ -78,12 +78,12 @@ are safe to allow.
 ## CLI
 
 ```bash
-flutterforge context [--json]       # detected conventions, with confidence and evidence
-flutterforge rules [--write]        # agent rules; --write previews .flutterforge/AGENT_RULES.md
-flutterforge init [--apply]         # pin detected values in .flutterforge.yaml
-flutterforge api --spec openapi.yaml --tag products            # preview diff, writes nothing
-flutterforge api --spec openapi.yaml --tag products --apply    # write
-flutterforge api --spec openapi.yaml --tag products --out plan.json && flutterforge apply plan.json
+flutter_dialect context [--json]       # detected conventions, with confidence and evidence
+flutter_dialect rules [--write]        # agent rules; --write previews .flutter_dialect/AGENT_RULES.md
+flutter_dialect init [--apply]         # pin detected values in .flutter_dialect.yaml
+flutter_dialect api --spec openapi.yaml --tag products            # preview diff, writes nothing
+flutter_dialect api --spec openapi.yaml --tag products --apply    # write
+flutter_dialect api --spec openapi.yaml --tag products --out plan.json && flutter_dialect apply plan.json
 ```
 
 Global option: `-C <dir>` for the project directory. Exit codes: 0 ok, 1 error, 2 conflicts,
@@ -91,7 +91,7 @@ Global option: `-C <dir>` for the project directory. Exit codes: 0 ok, 1 error, 
 
 ### Overriding detection
 
-`.flutterforge.yaml` wins over anything detected:
+`.flutter_dialect.yaml` wins over anything detected:
 
 ```yaml
 version: 1
@@ -132,12 +132,12 @@ project-specific error wrappers around API calls.
 
 ## Repository layout
 
-- `packages/flutterforge_core`: scanner, convention detection, config, similar-code lookup,
+- `packages/flutter_dialect_core`: scanner, convention detection, config, similar-code lookup,
   OpenAPI loader/emitter, change plans. Pure Dart; no Flutter, MCP or AI imports.
-- `packages/flutterforge`: the `flutterforge` CLI (`lib/cli.dart`) and the `flutterforge_mcp`
-  stdio server (`lib/mcp_server.dart`, on `dart_mcp`). Both only call `flutterforge_core`.
+- `packages/flutter_dialect`: the `flutter_dialect` CLI (`lib/cli.dart`) and the `flutter_dialect_mcp`
+  stdio server (`lib/mcp_server.dart`, on `dart_mcp`). Both only call `flutter_dialect_core`.
 - `test/fixtures`: sample projects, OpenAPI specs and golden outputs. After reviewing a change to
-  generated code, refresh goldens with `UPDATE_GOLDENS=1 dart test` in `packages/flutterforge_core`.
+  generated code, refresh goldens with `UPDATE_GOLDENS=1 dart test` in `packages/flutter_dialect_core`.
 - `docs/MVP_PLAN.md`: scope and plan.
 
 ## License

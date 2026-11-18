@@ -17,6 +17,6 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed packages
       - run: dart analyze --fatal-infos
       - run: dart test
-        working-directory: packages/flutterforge_core
+        working-directory: packages/flutter_dialect_core
       - run: dart test
-        working-directory: packages/flutterforge
+        working-directory: packages/flutter_dialect

@@ -1,3 +1,6 @@
+> **Note (2026-11-18):** the project was renamed to **Flutter Dialect** (packages
+> `flutter_dialect_core` and `flutter_dialect`). This plan keeps its original wording.
+
 # FlutterForge — MVP Plan (2–3 weeks, solo)
 
 > A small, deterministic Dart toolkit that **understands a Flutter project's conventions**

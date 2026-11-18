@@ -1,9 +1,9 @@
-name: flutterforge_workspace
+name: flutter_dialect_workspace
 publish_to: none
 environment:
   sdk: ^3.9.0
 workspace:
-  - packages/flutterforge_core
-  - packages/flutterforge
+  - packages/flutter_dialect_core
+  - packages/flutter_dialect
 dev_dependencies:
   lints: ^6.0.0
