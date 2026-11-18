@@ -18,6 +18,8 @@ class ForgeConfig {
     'models': ['freezed', 'json_serializable', 'hand-written'],
     'repository': ['concrete', 'interface+impl'],
     'json_methods': ['fromJson/toJson', 'fromMap/toMap'],
+    'client': ['dio', 'http', 'api_client'],
+    'imports': ['package', 'relative'],
   };
 
   static const allowedPaths = ['features', 'api_client'];

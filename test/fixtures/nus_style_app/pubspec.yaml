@@ -1,0 +1,5 @@
+name: nus_style
+environment:
+  sdk: ^3.9.0
+dependencies:
+  dio: ^5.9.0

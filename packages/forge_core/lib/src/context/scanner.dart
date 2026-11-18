@@ -48,6 +48,7 @@ class ScanResult {
     required this.libDirs,
     required this.rootEntries,
     required this.configYaml,
+    required this.analysisOptions,
   });
 
   final String root;
@@ -69,6 +70,9 @@ class ScanResult {
 
   /// Contents of `.flutterforge.yaml`, if present.
   final String? configYaml;
+
+  /// Contents of `analysis_options.yaml`, if present.
+  final String? analysisOptions;
 
   bool hasDependency(String name) =>
       dependencies.contains(name) || devDependencies.contains(name);
@@ -104,6 +108,7 @@ class ProjectScanner {
     }
 
     final configFile = File(p.join(root, '.flutterforge.yaml'));
+    final optionsFile = File(p.join(root, 'analysis_options.yaml'));
 
     final libDirs = <String>[];
     final libFiles = _dartFiles(root, 'lib', libDirs);
@@ -123,6 +128,9 @@ class ProjectScanner {
       },
       configYaml: configFile.existsSync()
           ? configFile.readAsStringSync()
+          : null,
+      analysisOptions: optionsFile.existsSync()
+          ? optionsFile.readAsStringSync()
           : null,
     );
   }

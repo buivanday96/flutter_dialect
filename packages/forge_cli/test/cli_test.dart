@@ -111,6 +111,151 @@ void main() {
     expect(state['source'], 'config');
   });
 
+  group('api', () {
+    final spec = p.join(fixtures, 'specs', 'shop.yaml');
+
+    void git(String dir, List<String> args) =>
+        Process.runSync('git', args, workingDirectory: dir);
+
+    Directory repo() {
+      final dir = tempCopy('flat_provider');
+      git(dir.path, ['init', '-q']);
+      git(dir.path, ['add', '-A']);
+      git(dir.path, [
+        '-c',
+        'user.email=t@t',
+        '-c',
+        'user.name=t',
+        'commit',
+        '-qm',
+        'i',
+      ]);
+      return dir;
+    }
+
+    test('previews a diff and writes nothing', () async {
+      final dir = repo();
+      final (code, out, err) = await cli([
+        '-C',
+        dir.path,
+        'api',
+        '--spec',
+        spec,
+        '--tag',
+        'orders',
+      ]);
+      expect(code, ExitCode.ok);
+      expect(out, contains('+++ b/lib/features/orders/orders_repository.dart'));
+      expect(out, contains('Nothing written'));
+      expect(err, contains('warning: '));
+      expect(
+        Directory(p.join(dir.path, 'lib/features/orders')).existsSync(),
+        isFalse,
+      );
+    });
+
+    test('--apply writes; a dirty tree exits 3', () async {
+      final dir = repo();
+      var (code, out, _) = await cli([
+        '-C',
+        dir.path,
+        'api',
+        '--spec',
+        spec,
+        '--tag',
+        'orders',
+        '--apply',
+      ]);
+      expect(code, ExitCode.ok);
+      expect(out, contains('wrote     lib/features/orders/orders_models.dart'));
+
+      // Now the tree is dirty (new files are uncommitted).
+      String err;
+      (code, _, err) = await cli([
+        '-C',
+        dir.path,
+        'api',
+        '--spec',
+        spec,
+        '--tag',
+        'products',
+        '--apply',
+      ]);
+      expect(code, ExitCode.dirtyTree);
+      expect(err, contains('uncommitted'));
+    });
+
+    test('existing files are conflicts: exit 2', () async {
+      final dir = repo();
+      final (code, out, _) = await cli([
+        '-C',
+        dir.path,
+        'api',
+        '--spec',
+        spec,
+        '--tag',
+        'products',
+      ]);
+      expect(code, ExitCode.conflict);
+      expect(out, contains('CONFLICT'));
+    });
+
+    test('--out saves a plan that apply writes later', () async {
+      final dir = repo();
+      final planFile = p.join(
+        dir.path,
+        '..',
+        '${p.basename(dir.path)}.plan.json',
+      );
+      addTearDown(() => File(planFile).deleteSync());
+      var (code, _, _) = await cli([
+        '-C',
+        dir.path,
+        'api',
+        '--spec',
+        spec,
+        '--tag',
+        'orders',
+        '--out',
+        planFile,
+      ]);
+      expect(code, ExitCode.ok);
+      String out;
+      (code, out, _) = await cli(['apply', planFile]);
+      expect(code, ExitCode.ok);
+      expect(out, contains('wrote'));
+      // Applying again: files now exist, so they are stale.
+      (code, _, _) = await cli(['apply', planFile, '--force']);
+      expect(code, ExitCode.conflict);
+    });
+
+    test('bad input exits 1', () async {
+      final (code, _, err) = await cli([
+        '-C',
+        p.join(fixtures, 'flat_provider'),
+        'api',
+        '--spec',
+        spec,
+        '--tag',
+        'nope',
+      ]);
+      expect(code, ExitCode.error);
+      expect(err, contains('Tags in the spec: products, orders'));
+      expect(
+        (await cli([
+          '-C',
+          p.join(fixtures, 'flat_provider'),
+          'api',
+          '--spec',
+          'missing.yaml',
+          '--tag',
+          'x',
+        ])).$1,
+        ExitCode.error,
+      );
+    });
+  });
+
   test('errors exit 1', () async {
     final (code, _, err) = await cli(['-C', '/nonexistent/x', 'context']);
     expect(code, ExitCode.error);

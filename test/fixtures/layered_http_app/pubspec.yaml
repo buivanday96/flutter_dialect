@@ -1,0 +1,5 @@
+name: layered_http
+environment:
+  sdk: ^3.5.0
+dependencies:
+  http: ^1.2.0

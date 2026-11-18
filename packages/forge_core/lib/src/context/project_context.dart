@@ -1,10 +1,14 @@
+import 'package:yaml/yaml.dart';
+
 import '../config/forge_config.dart';
+import 'client_shape.dart';
 import 'conventions.dart';
 import 'scanner.dart';
 
 /// Everything FlutterForge knows about a project's conventions.
 class ProjectContext {
   ProjectContext._({
+    required this.root,
     required this.name,
     required this.dartSdk,
     required this.flutterSdk,
@@ -17,6 +21,9 @@ class ProjectContext {
     required this.goldens,
     required this.testFileCount,
     required this.hasConfig,
+    required this.clientShape,
+    required this.pageWidth,
+    required this.languageVersion,
   });
 
   /// Scans [root] and applies its `.flutterforge.yaml`, if any.
@@ -42,6 +49,16 @@ class ProjectContext {
       'repository': detectRepository(scan),
     };
     detected['json_methods'] = detectJsonMethods(scan, detected['models']!);
+
+    final configApi = config?.paths['api_client'];
+    final apiClient = configApi != null
+        ? Detection.config(configApi)
+        : detectApiClient(scan);
+    final name = '${scan.pubspec['name'] ?? ''}';
+    final client = detectClientKind(scan, detected['network']!, apiClient);
+    detected['client'] = client.kind;
+    detected['imports'] = detectImportStyle(scan, name);
+
     final conventions = {
       for (final e in detected.entries)
         e.key: switch (config?.conventions[e.key]) {
@@ -53,25 +70,66 @@ class ProjectContext {
     final env = scan.pubspec['environment'];
     String? envValue(String key) =>
         env is Map && env[key] != null ? '${env[key]}' : null;
-    final configApi = config?.paths['api_client'];
+    final clientKind = conventions['client']!.value;
+    final dartSdk = envValue('sdk');
 
     return ProjectContext._(
-      name: '${scan.pubspec['name'] ?? ''}',
-      dartSdk: envValue('sdk'),
+      root: scan.root,
+      name: name,
+      dartSdk: dartSdk,
       flutterSdk: envValue('flutter'),
       platforms: detectPlatforms(scan),
       conventions: conventions,
-      apiClient: configApi != null
-          ? Detection.config(configApi)
-          : detectApiClient(scan),
+      apiClient: apiClient,
       featuresPath: config?.paths['features'] ?? layout.featuresPath,
       naming: detectNaming(scan),
       mocks: detectMocks(scan),
       goldens: detectGoldens(scan),
       testFileCount: scan.testFiles.length,
       hasConfig: config != null,
+      clientShape: clientKind == null
+          ? null
+          : buildClientShape(
+              scan,
+              clientKind,
+              apiClient.value,
+              client.fieldNames,
+            ),
+      pageWidth: _pageWidth(scan.analysisOptions),
+      languageVersion: _languageVersion(dartSdk),
     );
   }
+
+  static int _pageWidth(String? options) {
+    if (options == null) return 80;
+    try {
+      final doc = loadYaml(options);
+      final width = doc is Map && doc['formatter'] is Map
+          ? (doc['formatter'] as Map)['page_width']
+          : null;
+      return width is int ? width : 80;
+    } on YamlException {
+      return 80;
+    }
+  }
+
+  /// Lower bound of the SDK constraint, e.g. `^3.5.0` → `3.5`.
+  static String? _languageVersion(String? sdk) {
+    final m = sdk == null ? null : RegExp(r'(\d+)\.(\d+)').firstMatch(sdk);
+    return m == null ? null : '${m[1]}.${m[2]}';
+  }
+
+  /// Absolute project root.
+  final String root;
+
+  /// How to call HTTP like the existing repositories do; `null` if unknown.
+  final ClientShape? clientShape;
+
+  /// `formatter.page_width` from analysis_options.yaml (default 80).
+  final int pageWidth;
+
+  /// Minimum Dart language version, e.g. `3.5`.
+  final String? languageVersion;
 
   final String name;
   final String? dartSdk;
@@ -103,6 +161,12 @@ class ProjectContext {
   /// `fromJson/toJson` or `fromMap/toMap`.
   Detection get jsonMethods => conventions['json_methods']!;
 
+  /// `dio`, `http` or `api_client`: what repositories hold.
+  Detection get client => conventions['client']!;
+
+  /// `package` or `relative` imports inside lib/.
+  Detection get imports => conventions['imports']!;
+
   Map<String, Object?> toJson() => {
     'name': name,
     'sdk': {'dart': dartSdk, 'flutter': flutterSdk},
@@ -112,6 +176,8 @@ class ProjectContext {
       for (final e in conventions.entries) e.key: e.value.toJson(),
     },
     'apiClient': apiClient.toJson(),
+    'clientShape': clientShape?.toJson(),
+    'format': {'pageWidth': pageWidth, 'languageVersion': languageVersion},
     'paths': {'features': featuresPath},
     'naming': naming,
     'testing': {
@@ -196,11 +262,23 @@ class ProjectContext {
         ? ''
         : ' Go through the existing client in `$client`; do not create new '
               'HTTP client instances.';
+    final shape = clientShape;
+    final holds = switch (shape?.kind) {
+      'dio' =>
+        ' Repositories take a `Dio` in their constructor '
+            '(field `${shape!.fieldName}`).',
+      'http' => ' Repositories take an `http.Client` in their constructor.',
+      'api_client' =>
+        ' Repositories hold `${shape!.className}` '
+            '(field `${shape.fieldName}`)'
+            '${shape.singleton != null ? ', defaulting to `${shape.className}.${shape.singleton}`' : ''}.',
+      _ => '',
+    };
     switch (network.value) {
       case 'dio':
-        add('Networking', 'Use Dio.$viaClient');
+        add('Networking', 'Use Dio.$viaClient$holds');
       case 'http':
-        add('Networking', 'Use package:http.$viaClient');
+        add('Networking', 'Use package:http.$viaClient$holds');
       case 'retrofit':
         add(
           'Networking',
@@ -289,6 +367,16 @@ class ProjectContext {
     if (namingRules.isNotEmpty) {
       final text = namingRules.join('; ');
       add('File naming', '${text[0].toUpperCase()}${text.substring(1)}.');
+    }
+
+    switch (imports.value) {
+      case 'package':
+        add(
+          'Imports',
+          'Use package imports (`package:$name/...`) inside lib/.',
+        );
+      case 'relative':
+        add('Imports', 'Use relative imports inside lib/.');
     }
 
     if (mocks.value != null) {

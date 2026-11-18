@@ -1,0 +1,191 @@
+openapi: 3.1.0
+info:
+  title: NUS app API (modelled on .doc/api)
+  version: 1.0.0
+paths:
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phoneNumber, password]
+              properties:
+                phoneNumber: {type: string}
+                phoneCode: {type: string}
+                password: {type: string}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        required: [accessToken]
+                        properties:
+                          accessToken: {type: string}
+                          refreshToken: {type: [string, 'null']}
+  /api/v1/user/update:
+    patch:
+      operationId: updateUser
+      tags: [user]
+      requestBody:
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/UpdateUserRequest'}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Envelope'}
+  /api/v1/cartridge:
+    get:
+      operationId: listCartridges
+      tags: [cartridge]
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/CartridgeListResponse'}
+  /api/v2/test:
+    get:
+      operationId: listTests
+      tags: [test]
+      parameters:
+        - {name: status, in: query, schema: {$ref: '#/components/schemas/TestStatus'}}
+        - {name: page, in: query, schema: {type: integer}}
+        - {name: limit, in: query, schema: {type: integer}}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: {type: array, items: {$ref: '#/components/schemas/Test'}}
+    post:
+      operationId: createTest
+      tags: [test]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/CreateTestRequest'}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: {$ref: '#/components/schemas/Test'}
+  /api/v2/test/{testId}:
+    get:
+      operationId: getTest
+      tags: [test]
+      parameters:
+        - {name: testId, in: path, required: true, schema: {type: integer}}
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - properties:
+                      data: {$ref: '#/components/schemas/Test'}
+components:
+  schemas:
+    Envelope:
+      type: object
+      required: [code, message]
+      properties:
+        code: {type: integer}
+        message: {type: string}
+        data: {}
+    CartridgeListResponse:
+      allOf:
+        - $ref: '#/components/schemas/Envelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: {$ref: '#/components/schemas/Cartridge'}
+    Cartridge:
+      type: object
+      required: [id, name, code, type]
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        code: {type: string}
+        calibration: {type: boolean}
+        multiBiomarkers: {type: integer, description: '0 if SINGLE, 1 if multi.'}
+        type: {type: string, enum: [single, multi, octo]}
+        numberOfSample: {type: integer}
+        createdAt: {type: string, format: date-time}
+        biomarkers: {type: array, items: {$ref: '#/components/schemas/Biomarker'}}
+        durations: {type: array, items: {$ref: '#/components/schemas/Duration'}}
+        image: {type: string, description: Absolute URL.}
+    Biomarker:
+      type: object
+      required: [id, name]
+      properties:
+        id: {type: integer}
+        name: {type: string}
+        code: {type: string}
+        formula: {type: string}
+        sampleConcentration: {type: number}
+        order: {type: integer}
+        cartridgeId: {type: [integer, 'null']}
+    Duration:
+      type: object
+      required: [id, duration, period]
+      properties:
+        id: {type: integer}
+        duration: {type: integer}
+        period: {type: integer}
+    TestStatus:
+      type: string
+      enum: [pending, running, done, failed]
+    Test:
+      type: object
+      required: [id, status, cartridgeId]
+      properties:
+        id: {type: integer}
+        status: {$ref: '#/components/schemas/TestStatus'}
+        cartridgeId: {type: integer}
+        result: {type: [number, 'null']}
+        createdAt: {type: string, format: date-time}
+    CreateTestRequest:
+      type: object
+      required: [cartridgeId, biomarkerId, duration, period]
+      properties:
+        cartridgeId: {type: integer}
+        biomarkerId: {type: integer}
+        duration: {type: integer}
+        period: {type: integer}
+    UpdateUserRequest:
+      type: object
+      properties:
+        name: {type: string}
+        phoneNumber: {type: string}
+        phoneCode: {type: string}
+        otp: {type: string}
+        password: {type: string}
+        oldPassword: {type: string}
