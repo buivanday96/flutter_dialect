@@ -1,0 +1,14 @@
+name: flat_shop
+environment:
+  sdk: ^3.5.0
+  flutter: ">=3.24.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  go_router: ^14.0.0
+  dio: ^5.7.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
