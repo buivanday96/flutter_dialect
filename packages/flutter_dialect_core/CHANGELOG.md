@@ -1,3 +1,8 @@
+## 0.1.2
+
+- Add a runnable example (`example/main.dart`): detect conventions, print agent
+  rules, find an example file, and preview generated API code.
+
 ## 0.1.1
 
 - Add repository and issue tracker links. No code changes.
