@@ -139,3 +139,7 @@ project-specific error wrappers around API calls.
 - `test/fixtures`: sample projects, OpenAPI specs and golden outputs. After reviewing a change to
   generated code, refresh goldens with `UPDATE_GOLDENS=1 dart test` in `packages/flutterforge_core`.
 - `docs/MVP_PLAN.md`: scope and plan.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
