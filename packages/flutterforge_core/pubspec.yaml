@@ -1,0 +1,16 @@
+name: flutterforge_core
+description: >-
+  Detects a Flutter project's conventions (state management, layout, HTTP
+  client, model style) and generates OpenAPI code that follows them.
+version: 0.1.0
+resolution: workspace
+environment:
+  sdk: ^3.9.0
+topics: [flutter, codegen, openapi, mcp, conventions]
+dependencies:
+  dart_style: ^3.1.0
+  path: ^1.9.0
+  pub_semver: ^2.1.0
+  yaml: ^3.1.2
+dev_dependencies:
+  test: ^1.25.0

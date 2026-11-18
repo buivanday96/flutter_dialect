@@ -3,8 +3,7 @@ publish_to: none
 environment:
   sdk: ^3.9.0
 workspace:
-  - packages/forge_core
-  - packages/forge_cli
-  - packages/forge_mcp
+  - packages/flutterforge_core
+  - packages/flutterforge
 dev_dependencies:
   lints: ^6.0.0

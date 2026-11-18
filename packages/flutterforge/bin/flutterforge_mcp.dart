@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:dart_mcp/stdio.dart';
-import 'package:forge_mcp/server.dart';
+import 'package:flutterforge/mcp_server.dart';
 
 /// Stdio MCP server. Logs go to stderr; stdout carries JSON-RPC only.
 void main(List<String> args) {

@@ -17,8 +17,6 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed packages
       - run: dart analyze --fatal-infos
       - run: dart test
-        working-directory: packages/forge_core
+        working-directory: packages/flutterforge_core
       - run: dart test
-        working-directory: packages/forge_cli
-      - run: dart test
-        working-directory: packages/forge_mcp
+        working-directory: packages/flutterforge

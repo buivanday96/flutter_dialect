@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:forge_core/forge_core.dart';
+import 'package:flutterforge_core/flutterforge_core.dart';
 import 'package:path/path.dart' as p;
 
 /// Exit codes (see docs/MVP_PLAN.md §7).

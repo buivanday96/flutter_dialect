@@ -11,7 +11,7 @@ apply a previewed plan.
 ## 60-second tour
 
 ```bash
-dart pub global activate --source path packages/forge_cli   # `flutterforge` command
+dart pub global activate flutterforge    # installs `flutterforge` and `flutterforge_mcp`
 cd path/to/your_app
 flutterforge rules
 ```
@@ -40,22 +40,26 @@ rules and real example files before writing code.
 
 ## MCP server
 
-Build it once:
-
-```bash
-dart compile exe packages/forge_mcp/bin/flutterforge_mcp.dart -o ~/.local/bin/flutterforge_mcp
-```
+After `dart pub global activate flutterforge`, `flutterforge_mcp` is on your PATH
+(`~/.pub-cache/bin`).
 
 **Claude Code** (run inside your Flutter project):
 
 ```bash
-claude mcp add flutterforge -- ~/.local/bin/flutterforge_mcp
+claude mcp add flutterforge -- flutterforge_mcp
 ```
 
 **Cursor**: add to `.cursor/mcp.json`:
 
 ```json
-{ "mcpServers": { "flutterforge": { "command": "/Users/you/.local/bin/flutterforge_mcp" } } }
+{ "mcpServers": { "flutterforge": { "command": "flutterforge_mcp" } } }
+```
+
+For the fastest startup, compile a native binary from a checkout of this repository and point the
+config at it:
+
+```bash
+dart compile exe packages/flutterforge/bin/flutterforge_mcp.dart -o ~/.local/bin/flutterforge_mcp
 ```
 
 The server uses its working directory as the project; pass `--root <dir>` to override.
@@ -128,10 +132,10 @@ project-specific error wrappers around API calls.
 
 ## Repository layout
 
-- `packages/forge_core`: scanner, convention detection, config, similar-code lookup, OpenAPI
-  loader/emitter, change plans. Pure Dart; no Flutter, MCP or AI imports.
-- `packages/forge_cli`: the `flutterforge` command.
-- `packages/forge_mcp`: the stdio MCP server (`dart_mcp`).
+- `packages/flutterforge_core`: scanner, convention detection, config, similar-code lookup,
+  OpenAPI loader/emitter, change plans. Pure Dart; no Flutter, MCP or AI imports.
+- `packages/flutterforge`: the `flutterforge` CLI (`lib/cli.dart`) and the `flutterforge_mcp`
+  stdio server (`lib/mcp_server.dart`, on `dart_mcp`). Both only call `flutterforge_core`.
 - `test/fixtures`: sample projects, OpenAPI specs and golden outputs. After reviewing a change to
-  generated code, refresh goldens with `UPDATE_GOLDENS=1 dart test` in `packages/forge_core`.
+  generated code, refresh goldens with `UPDATE_GOLDENS=1 dart test` in `packages/flutterforge_core`.
 - `docs/MVP_PLAN.md`: scope and plan.

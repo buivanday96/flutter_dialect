@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:forge_cli/cli.dart';
+import 'package:flutterforge/cli.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 

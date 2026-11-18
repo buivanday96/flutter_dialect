@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:forge_core/forge_core.dart';
+import 'package:flutterforge_core/flutterforge_core.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
