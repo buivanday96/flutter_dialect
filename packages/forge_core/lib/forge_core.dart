@@ -10,6 +10,7 @@ export 'src/context/client_shape.dart' show ClientShape, WrapperMethod;
 export 'src/context/conventions.dart' show Detection;
 export 'src/context/project_context.dart';
 export 'src/context/scanner.dart';
+export 'src/context/similar_code.dart';
 export 'src/openapi/emitter.dart';
 export 'src/openapi/ir.dart';
 export 'src/openapi/loader.dart';

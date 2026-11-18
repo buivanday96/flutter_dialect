@@ -20,3 +20,5 @@ jobs:
         working-directory: packages/forge_core
       - run: dart test
         working-directory: packages/forge_cli
+      - run: dart test
+        working-directory: packages/forge_mcp

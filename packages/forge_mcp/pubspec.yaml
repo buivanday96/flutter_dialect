@@ -1,0 +1,16 @@
+name: forge_mcp
+description: MCP server that gives AI coding agents a Flutter project's conventions.
+version: 0.1.0-dev
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.9.0
+executables:
+  flutterforge_mcp: flutterforge_mcp
+dependencies:
+  args: ^2.6.0
+  dart_mcp: 0.5.2
+  forge_core: ^0.1.0-dev
+  path: ^1.9.0
+dev_dependencies:
+  test: ^1.25.0
